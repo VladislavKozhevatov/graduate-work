@@ -36,5 +36,4 @@ public class CommentMapper {
                 .text(dto.getText())
                 .build();
     }
-
 }

@@ -86,7 +86,6 @@ public class UserController {
         Files.write(path, image.getBytes());
         return "/" + path.toString().replace("\\", "/");
     }
-
 }
 
 

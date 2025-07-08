@@ -48,5 +48,4 @@ public class AdMapper {
                 .author(author)
                 .build();
     }
-
 }

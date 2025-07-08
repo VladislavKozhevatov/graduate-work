@@ -27,6 +27,7 @@ public class Advertisement {
     @Schema(description = "Автор объявления")
     private UserEntity author;
 
+
     @Column(nullable = false)
     @Schema(description = "Заголовок объявления")
     private String title;

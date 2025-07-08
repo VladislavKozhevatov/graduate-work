@@ -11,12 +11,13 @@ import java.util.List;
 public class Ads {
 
     @Schema(description = "Общее количество объявлений")
-    private Integer count ;
+    private Integer count;
 
     @Schema(description = "Список объявлений")
-    private List<AdDTO> results ;
+    private List<AdDTO> results;
 
-    public Ads() {}
+    public Ads() {
+    }
 
     public Ads(Integer count, List<AdDTO> results) {
         this.count = count;

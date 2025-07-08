@@ -21,17 +21,19 @@ import ru.skypro.homework.service.Mapper.AdMapper;
 import ru.skypro.homework.service.impl.AdvertisementService;
 import ru.skypro.homework.service.impl.ImageService;
 import org.springframework.security.core.Authentication;
+
 import java.io.IOException;
 
 /**
  * Контроллер для работы с объявлениями
+ *
  * @CrossOrigin(value = "http://localhost:3000") - разрешает доступ к API с любого домена
  */
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/ads")
 @RequiredArgsConstructor
-@Tag(name = "Объявления",description = "Операции с объявлениями")
+@Tag(name = "Объявления", description = "Операции с объявлениями")
 public class AdsController {
 
 
@@ -40,9 +42,9 @@ public class AdsController {
     private AdMapper adMapper;
 
     /**
-     *Метод для получения всех объявлений
+     * Метод для получения всех объявлений
      */
-    @Operation(summary = "Получение всех объявлений",tags = "Объявления")
+    @Operation(summary = "Получение всех объявлений", tags = "Объявления")
     @GetMapping
     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Ads.class)))
     @ApiResponse(responseCode = "500", description = "Internal Server Error")
@@ -52,6 +54,7 @@ public class AdsController {
 
     /**
      * Метод для добавления нового объявления
+     *
      * @SecurityRequirement(name = "basicAuth") - обязательно требуется авторизация
      */
     @Operation(summary = "Добавление нового объявления")
@@ -63,7 +66,7 @@ public class AdsController {
     @ApiResponse(responseCode = "403", description = "Forbidden")
     @ResponseStatus(HttpStatus.CREATED)
     public AdDTO addAd(@RequestPart("properties") CreateOrUpdateAd properties,
-                       @RequestPart("image") MultipartFile image,  Authentication authentication) throws IOException {
+                       @RequestPart("image") MultipartFile image, Authentication authentication) throws IOException {
         return advertisementService.createAd(properties, image, authentication.getName());
     }
 

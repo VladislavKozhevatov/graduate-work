@@ -30,7 +30,6 @@ public class AuthServiceImpl implements AuthService {
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("Invalid password");
         }
-
         return userMapper.toDto(user);
     }
 

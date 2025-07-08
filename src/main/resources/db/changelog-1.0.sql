@@ -10,7 +10,6 @@ CREATE TABLE users (
     image VARCHAR(255)
 );
 
-
 CREATE TABLE advertisement (
     id BIGSERIAL PRIMARY KEY,
     author_id BIGINT NOT NULL,
@@ -20,7 +19,6 @@ CREATE TABLE advertisement (
     image VARCHAR(255) NOT NULL,
     CONSTRAINT fk_ad_user FOREIGN KEY (author_id) REFERENCES users(id)
 );
-
 
 CREATE TABLE comment (
     id BIGSERIAL PRIMARY KEY,

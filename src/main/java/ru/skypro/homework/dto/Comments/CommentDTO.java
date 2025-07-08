@@ -1,4 +1,5 @@
 package ru.skypro.homework.dto.Comments;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 public class CommentDTO {
 
     @Schema(description = "ID автора комментария")
-    private Long author ;
+    private Long author;
 
     @Schema(description = "Ссылка на аватар автора")
     private String authorImage;
@@ -25,12 +26,12 @@ public class CommentDTO {
     private String authorFirstName;
 
     @Schema(description = "Дата и время создания")
-    private long createdAt ;
+    private long createdAt;
 
     @Schema(description = "ID комментария")
-    private Long pk ;
+    private Long pk;
 
     @Schema(description = "Текст комментария")
-    private String text ;
+    private String text;
 
 }

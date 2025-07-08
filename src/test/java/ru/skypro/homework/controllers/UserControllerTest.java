@@ -108,7 +108,6 @@ class UserControllerIntegrationTest {
                 .andExpect(status().isOk());
     }
 
-
     @Test
     void getCurrentUser_ShouldReturnUnauthorized_WhenNoAuth() throws Exception {
         mockMvc.perform(get("/users/me"))

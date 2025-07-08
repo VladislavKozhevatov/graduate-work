@@ -3,6 +3,7 @@ package ru.skypro.homework.dto.Registration;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+
 @Data
 @Schema(description = "Данные для смены пароля пользователя")
 public class Password {

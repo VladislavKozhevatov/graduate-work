@@ -73,6 +73,7 @@ public class UserService {
         return userMapper.toDto(savedUser); // Преобразуем в DTO перед возвратом
     }
 
+
     public void updateUserImage(String email, MultipartFile image) throws IOException {
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));

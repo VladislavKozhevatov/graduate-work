@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AdvertisementRepository extends JpaRepository<Advertisement,Long> {
+public interface AdvertisementRepository extends JpaRepository<Advertisement, Long> {
     List<Advertisement> findByAuthorEmail(String email); // Для получения объявлений пользователя
 
     boolean existsByIdAndAuthorEmail(Long adId, String email);

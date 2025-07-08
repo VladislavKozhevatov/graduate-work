@@ -169,6 +169,7 @@ class AdsControllerIntegrationTest {
                 .andExpect(jsonPath("$.title").value("Updated Title"));
     }
 
+
     @Test
     void getAdsMe_ShouldReturnUserAds() throws Exception {
         mockMvc.perform(get("/ads/me")
