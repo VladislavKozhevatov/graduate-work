@@ -1,9 +1,12 @@
 package ru.skypro.homework.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.MediaType;
@@ -13,9 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.Registration.Password;
 import ru.skypro.homework.dto.User.UpdatedUser;
 import ru.skypro.homework.dto.User.UserDTO;
-import ru.skypro.homework.entity.UserEntity;
-import ru.skypro.homework.repository.UserRepository;
-import ru.skypro.homework.service.impl.ImageService;
 import ru.skypro.homework.service.impl.UserService;
 
 import java.io.IOException;
@@ -37,6 +37,9 @@ public class UserController {
 
 
     @GetMapping("/me")
+    @ApiResponse(responseCode = "200", description = "OK",
+            content = @Content(schema = @Schema(implementation = UserDTO.class)))
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
     public ResponseEntity<UserDTO> getCurrentUser(Principal principal) {
         return ResponseEntity.ok(userService.getCurrentUser(principal.getName()));
     }
@@ -53,7 +56,7 @@ public class UserController {
     @PostMapping("/set_password")
     public ResponseEntity<Void> setPassword(
             Principal principal,
-            @RequestBody Password password
+            @Valid @RequestBody Password password
     ) {
         userService.updatePassword(principal.getName(), password);
         return ResponseEntity.ok().build();

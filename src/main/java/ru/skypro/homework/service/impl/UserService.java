@@ -2,6 +2,7 @@ package ru.skypro.homework.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import ru.skypro.homework.service.Mapper.UserMapper;
 
 import java.io.IOException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -27,18 +29,28 @@ public class UserService {
 
     public UserEntity findByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
     }
 
     public void updatePassword(String email, Password passwordDto) {
+        if (passwordDto == null || passwordDto.getCurrentPassword() == null || passwordDto.getNewPassword() == null) {
+            throw new IllegalArgumentException("Пароль не может быть пустым");
+        }
+
         UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
 
-        // Проверка текущего пароля.
+        // Проверка текущего пароля
         if (!passwordEncoder.matches(passwordDto.getCurrentPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Неверный пароль");
+            throw new BadCredentialsException("Неверный текущий пароль");
         }
 
+        // Проверка что новый пароль отличается от старого
+        if (passwordEncoder.matches(passwordDto.getNewPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Новый пароль должен отличаться от текущего");
+        }
+
+        log.info("Changing password for user: {}", email);
         user.setPassword(passwordEncoder.encode(passwordDto.getNewPassword()));
         userRepository.save(user);
     }
@@ -77,7 +89,9 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserDTO getCurrentUser(String name) {
-        return UserDTO.builder().build();
+    public UserDTO getCurrentUser(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь не найден"));
+        return userMapper.toDto(user);
     }
 }

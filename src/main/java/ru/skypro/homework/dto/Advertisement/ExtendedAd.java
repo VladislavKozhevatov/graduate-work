@@ -15,31 +15,31 @@ import lombok.NoArgsConstructor;
 public class ExtendedAd {
 
     @Schema(description = "ID объявления")
-    private Long pk ;
+    private Long pk;
 
     @Schema(description = "Имя автора")
-    private String authorFirstName = "";
+    private String authorFirstName;
 
     @Schema(description = "Фамилия автора")
-    private String authorLastName = "";
+    private String authorLastName;
 
     @Schema(description = "Подробное описание")
-    private String description = "";
+    private String description;
 
     @Schema(description = "Email автора")
-    private String email = "";
+    private String email;
 
     @Schema(description = "Ссылка на изображение")
-    private String image = "";
+    private String image;
 
     @Schema(description = "Телефон автора")
-    private String phone = "";
+    private String phone;
 
     @Schema(description = "Цена в рублях")
-    private Integer price = 0;
+    private Integer price;
 
     @Schema(description = "Заголовок объявления")
-    private String title = "";
+    private String title;
 
 }
 

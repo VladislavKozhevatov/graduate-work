@@ -1,6 +1,7 @@
 package ru.skypro.homework.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,9 +28,14 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @Operation(summary = "Авторизация пользователя")
+    @Operation(summary = "Авторизация пользователя",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Успешная авторизация"),
+                    @ApiResponse(responseCode = "401", description = "Неверные учетные данные"),
+                    @ApiResponse(responseCode = "400", description = "Некорректные входные данные")
+            })
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> login(@Valid @RequestBody Login login) {
+    public ResponseEntity<UserDTO> login(@RequestBody Login login) {
         return ResponseEntity.ok(authService.login(login.getUsername(), login.getPassword()));
     }
 

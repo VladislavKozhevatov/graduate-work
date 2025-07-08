@@ -1,10 +1,9 @@
 package ru.skypro.homework.entity;
 
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
-
 
 import java.util.List;
 
@@ -12,10 +11,11 @@ import java.util.List;
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Модель объявления")
-
 public class Advertisement {
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,6 +44,7 @@ public class Advertisement {
     private List<Comment> comments;
 
     @Column(nullable = false)
+    @NotNull
     @Schema(description = "Ссылка на изображение объявления")
     private String image;
 

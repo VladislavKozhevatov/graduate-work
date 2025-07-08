@@ -9,10 +9,10 @@ import lombok.Data;
 public class Login {
     @Schema(description = "Логин пользователя (email)",
             example = "user@example.com")
-    private String username = "";
+    private String username;
 
     @Schema(description = "Пароль пользователя",
             example = "myPassword123")
-    private String password = "";
+    private String password;
 
 }

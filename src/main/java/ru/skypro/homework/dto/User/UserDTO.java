@@ -31,7 +31,7 @@ public class UserDTO {
 
     @Schema(description = "Роль пользователя",
             allowableValues = {"USER", "ADMIN"})
-    private Role role = Role.USER;
+    private Role role;
 
     @Schema(description = "Ссылка на аватар",
             example = "/users/image/123")

@@ -37,11 +37,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public UserDTO register(Register register) {
         if (userRepository.existsByEmail(register.getUsername())) {
-            throw new UserAlreadyExistsException("User already exists");
+            throw new UserAlreadyExistsException("Пользователь с таким email уже существует");
         }
 
         UserEntity newUser = userMapper.toEntity(register);
-        newUser.setPassword(passwordEncoder.encode(register.getPassword()));
+        newUser.setPassword(passwordEncoder.encode(register.getPassword())); // зашифровываем пароль
         UserEntity savedUser = userRepository.save(newUser);
 
         return userMapper.toDto(savedUser);

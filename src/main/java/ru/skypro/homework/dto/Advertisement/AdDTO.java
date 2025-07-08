@@ -13,19 +13,19 @@ import lombok.NoArgsConstructor;
 public class AdDTO {
 
     @Schema(description = "ID автора объявления")
-    private Long author ;
+    private Long author;
 
     @Schema(description = "Ссылка на изображение",
             example = "/ads/image/1")
-    private String image = "";
+    private String image;
 
     @Schema(description = "ID объявления")
-    private Long pk ;
+    private Long pk;
 
     @Schema(description = "Цена в рублях")
-    private Integer price = 0;
+    private Integer price;
 
     @Schema(description = "Заголовок объявления")
-    private String title = "";
+    private String title;
 
 }

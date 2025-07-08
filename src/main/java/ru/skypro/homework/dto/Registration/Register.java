@@ -9,28 +9,28 @@ public class Register {
 
     @Schema(description = "Email пользователя",
             example = "user@example.com")
-    private String username = "";
+    private String username;
 
     @Schema(description = "Пароль пользователя",
             example = "password",
             minLength = 8)
-    private String password = "";
+    private String password;
 
     @Schema(description = "Имя пользователя",
             example = "Иван")
-    private String firstName = "";
+    private String firstName;
 
     @Schema(description = "Фамилия пользователя",
             example = "Иванов")
-    private String lastName = "";
+    private String lastName;
 
     @Schema(description = "Телефон пользователя в формате +7XXXYYYZZZZ",
             example = "+79991234567")
-    private String phone = "";
+    private String phone;
 
     @Schema(description = "Роль пользователя",
             allowableValues = {"USER", "ADMIN"},
             defaultValue = "USER")
-    private Role role = Role.USER ;
+    private Role role;
 
 }

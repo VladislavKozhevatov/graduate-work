@@ -10,16 +10,16 @@ public class CreateOrUpdateAd {
     @Schema(description = "Заголовок объявления",
             minLength = 5,
             maxLength = 100)
-    private String title = "";
+    private String title;
 
 
     @Schema(description = "Цена в рублях",
             minimum = "0")
-    private Integer price = 0;
+    private Integer price;
 
 
     @Schema(description = "Подробное описание",
             maxLength = 1000)
-    private String description = "";
+    private String description;
 
 }
