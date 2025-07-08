@@ -21,7 +21,6 @@ import java.util.List;
 @RequestMapping("/ads/{adId}/comments")
 public class CommentsController {
 
-
     /**
      * Получение всех комментариев
      */

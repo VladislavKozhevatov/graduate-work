@@ -32,7 +32,6 @@ import java.util.UUID;
 @RequestMapping("/users")
 public class UserController {
 
-
     private final UserService userService;
 
 

@@ -36,7 +36,6 @@ import java.io.IOException;
 @Tag(name = "Объявления", description = "Операции с объявлениями")
 public class AdsController {
 
-
     private final AdvertisementService advertisementService;
     private final ImageService imageService;
     private AdMapper adMapper;
