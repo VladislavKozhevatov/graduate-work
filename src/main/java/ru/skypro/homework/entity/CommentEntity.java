@@ -1,44 +1,46 @@
 package ru.skypro.homework.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.Instant;
-
+import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "comments")
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Schema(description = "Комментарий к объявлению")
-
 public class CommentEntity {
 
+    @Schema(description = "id комментария")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "id пользователя")
-    private Long pk;
+    private Integer id;
 
-    @Column(nullable = false)
     @Schema(description = "текст комментария")
+    @Column(name = "text")
     private String text;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
-    @Schema(description = "Автор комментария")
-    private UserEntity author;
+    @Schema(description = "дата и время создания комментария в миллисекундах с 00:00:00 01.01.1970")
+    @Column(name = "data_time")
+    private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ad_pk", nullable = false)
-    @Schema(description = "id объявления")
+    @Schema(description = "объявление")
+    @ManyToOne
+    @JoinColumn(name = "ads_id")
     private AdEntity ad;
 
-    @Column(nullable = false)
-    @Schema(description = "Дата и время создания комментария")
-    private Instant createdAt;
+    @Schema(description = "id автора комментария")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "users_id")
+    private UserEntity author;
+
+    public CommentEntity() {
+    }
+
+    public CommentEntity(String text, LocalDateTime createdAt, AdEntity ad, UserEntity author) {
+        this.text = text;
+        this.createdAt = createdAt;
+        this.ad = ad;
+        this.author = author;
+    }
 }

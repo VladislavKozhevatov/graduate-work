@@ -1,56 +1,101 @@
 package ru.skypro.homework.entity;
 
-
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.*;
 
 @Entity
-@Table(name = "users") // Изменено для соответствия миграции
+@Table(name = "users")
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Schema(description = "Модель пользователя")
-public class UserEntity {
+public class UserEntity implements UserDetails {
 
+    @Schema(description = "id пользователя")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "Уникальный идентификатор пользователя")
-    private Long id;
+    private Integer id;
 
-    @Column(nullable = false, unique = true)
-    @Schema(description = "Email пользователя")
-    private String email;
-
-    @Column(name = "first_name", nullable = false)
-    @Schema(description = "Имя пользователя")
+    @Schema(description = "имя пользователя")
+    @Column(name = "first_name")
     private String firstName;
 
-    @Column(name = "last_name", nullable = false)
-    @Schema(description = "Фамилия пользователя")
+    @Schema(description = "фамилия пользователя")
+    @Column(name = "last_name")
     private String lastName;
 
-    @Column(nullable = false)
+    @Schema(description = "логин пользователя")
+    @Column(name = "email")
+    private String email;
+
+    @Schema(description = "пароль")
+    @Column(name = "password")
     private String password;
 
-    @Column(nullable = false)
-    @Schema(description = "Телефон пользователя")
-    private String phone;
+    @Schema(description = "телефон пользователя")
+    @Column(name = "phone")
+    private String phoneNumber;
 
-    @Column(nullable = false)
+    @Schema(description = "роль пользователя")
+    @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    @Schema(description = "Роль пользователя", example = "USER")
     private Role role;
 
-    private String image; // Добавлено поле для хранения ссылки на аватар
+    @Schema(description = "ссылка на аватар пользователя")
+    @Column(name = "image")
+    private String imagePath;
 
+    @Schema(description = "признак активного аккаунта")
+    @Column(name = "enabled")
+    private boolean enabled;
 
+    @OneToMany(mappedBy = "author")
+    private Set<CommentEntity> commentsByUser = new HashSet<>();
+
+    @OneToMany(mappedBy = "author")
+    private Set<AdEntity> adsByUser = new HashSet<>();
+
+    public UserEntity() {
+    }
+
+    public UserEntity(String firstName, String lastName, String email, String password, String phoneNumber, Role role, String imagePath, Set<CommentEntity> commentsByUser, Set<AdEntity> adsByUser) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+        this.role = role;
+        this.imagePath = imagePath;
+        this.commentsByUser = commentsByUser;
+        this.adsByUser = adsByUser;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return enabled;
+    }
 }

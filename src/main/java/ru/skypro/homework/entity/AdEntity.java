@@ -1,51 +1,56 @@
 package ru.skypro.homework.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.Data;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
+@Table(name = "ads")
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Schema(description = "Модель объявления")
-@Table(name="advertisement")
 public class AdEntity {
 
-
+    @Schema(description = "id объявления")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "Уникальный идентификатор объявления")
-    @Column(name = "pk")
-    private Long pk;
+    private Integer id;
 
-    @Column(nullable = false)
-    @Schema(description = "Заголовок объявления")
+    @Schema(description = "заголовок объявления")
+    @Column(name = "title")
     private String title;
 
-    @Column(nullable = false)
-    @Schema(description = "Цена объявления")
+    @Schema(description = "цена объявления")
+    @Column(name = "price")
     private Integer price;
 
-    @Column(nullable = false)
-    @Schema(description = "Описание объявления")
+    @Schema(description = "описание объявления")
+    @Column(name = "description")
     private String description;
 
+    @Schema(description = "ссылка на картинку объявления")
+    @Column(name = "image")
+    private String imagePath;
 
+    @Schema(description = "id автора объявления")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", nullable = false)
-    @Schema(description = "Автор объявления")
+    @JoinColumn(name = "users_id")
     private UserEntity author;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "image_id")
-    private AdImage image;
-    // private String image;
+    @OneToMany(mappedBy = "ad")
+    private Set<CommentEntity> commentsInAd = new HashSet<>();
 
-    private LocalDateTime createdAt;
+    public AdEntity() {
+    }
 
+    public AdEntity(String title, Integer price, String description, String imagePath, UserEntity author, Set<CommentEntity> commentsInAd) {
+        this.title = title;
+        this.price = price;
+        this.description = description;
+        this.imagePath = imagePath;
+        this.author = author;
+        this.commentsInAd = commentsInAd;
+    }
 }
