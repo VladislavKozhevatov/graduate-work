@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - include:
+      file: scripts/user.sql
+  - include:
+      file: scripts/users_add_enabled_flag.sql
+  - include:
+      file: scripts/users_increase_password_length.sql
+  - include:
+      file: scripts/users_increase_phone_length.sql
