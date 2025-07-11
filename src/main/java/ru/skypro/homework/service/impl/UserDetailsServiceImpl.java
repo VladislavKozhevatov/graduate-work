@@ -1,6 +1,5 @@
 package ru.skypro.homework.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,19 +11,18 @@ import ru.skypro.homework.repository.UserRepository;
 import java.util.Collections;
 
 @Service
-@RequiredArgsConstructor
-
-
 public class UserDetailsServiceImpl implements UserDetailsService {
+
     private final UserRepository userRepository;
 
-    /**
-     * Метод для получения пользователя по email
-     * Для аутентификации пользователя из базы данных
-     */
+    // Упрощенный конструктор с 1 параметром
+    public UserDetailsServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user = userRepository.findByEmail(username)
+    public UserDetails loadUserByUsername(String email) {
+        UserEntity user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return new org.springframework.security.core.userdetails.User(
@@ -34,3 +32,4 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         );
     }
 }
+

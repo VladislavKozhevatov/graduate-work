@@ -2,13 +2,14 @@ package ru.skypro.homework.entity;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import ru.skypro.homework.dto.Role;
 
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -49,12 +50,7 @@ public class UserEntity {
     @Schema(description = "Роль пользователя", example = "USER")
     private Role role;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Advertisement> advertisements;
+    private String image; // Добавлено поле для хранения ссылки на аватар
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    public List<Comment> comments;
 
-    @Schema(description = "Ссылка на аватар пользователя", example = "/users/image/1")
-    private String image;
 }

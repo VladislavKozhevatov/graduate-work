@@ -1,11 +1,13 @@
 package ru.skypro.homework.entity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.time.Instant;
 
 
 @Entity
@@ -15,12 +17,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Schema(description = "Комментарий к объявлению")
 
-public class Comment {
+public class CommentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Schema(description = "id пользователя")
-    private Long id;
+    private Long pk;
+
+    @Column(nullable = false)
+    @Schema(description = "текст комментария")
+    private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
@@ -28,16 +34,11 @@ public class Comment {
     private UserEntity author;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ad_id", nullable = false)
+    @JoinColumn(name = "ad_pk", nullable = false)
     @Schema(description = "id объявления")
-    private Advertisement ad;
+    private AdEntity ad;
 
     @Column(nullable = false)
-    @Schema(description = "дата создания комментария")
-    private long createdAt;
-
-    @Column(nullable = false)
-    @Schema(description = "текст комментария")
-    private String text;
-
+    @Schema(description = "Дата и время создания комментария")
+    private Instant createdAt;
 }

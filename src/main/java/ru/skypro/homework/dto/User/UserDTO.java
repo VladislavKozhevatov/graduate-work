@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.skypro.homework.dto.Role;
 
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -30,11 +29,9 @@ public class UserDTO {
     @Schema(description = "Телефон в формате +7XXXYYYZZZZ")
     private String phone;
 
-    @Schema(description = "Роль пользователя",
-            allowableValues = {"USER", "ADMIN"})
+    @Schema(description = "Роль пользователя", allowableValues = {"USER", "ADMIN"})
     private Role role;
 
-    @Schema(description = "Ссылка на аватар",
-            example = "/users/image/123")
-    private String image;
+    @Schema(description = "Ссылка на аватар", example = "/users/image/123")
+    private String image;  // Оставляем String для API
 }

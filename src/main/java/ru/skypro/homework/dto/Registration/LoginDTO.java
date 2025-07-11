@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Schema(description = "Данные для входа пользователя")
-public class Login {
+public class LoginDTO {
     @Schema(description = "Логин пользователя (email)",
             example = "user@example.com")
     private String username;

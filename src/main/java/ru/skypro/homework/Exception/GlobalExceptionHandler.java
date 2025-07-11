@@ -1,21 +1,22 @@
 package ru.skypro.homework.Exception;
 
-import jakarta.persistence.EntityNotFoundException;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+
+
 import org.springframework.context.support.DefaultMessageSourceResolvable; // Добавленный импорт
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
 
+
+import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
 import java.util.stream.Collectors;
-
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserAlreadyExistsException.class)
@@ -56,6 +57,12 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(errorMessage));
     }
 
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<ErrorResponse> handleMultipartException(MultipartException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("Ошибка загрузки файла: " + ex.getMessage()));
+    }
+
     @ExceptionHandler(IOException.class)
     public ResponseEntity<ErrorResponse> handleIOException(IOException ex) {
         return ResponseEntity
@@ -63,9 +70,10 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("Ошибка обработки файла"));
     }
 
-    @Data
-    @AllArgsConstructor
-    private static class ErrorResponse {
-        private String message;
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ex.getMessage()));
     }
 }

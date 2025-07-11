@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Schema(description = "Данные для смены пароля пользователя")
-public class Password {
+public class PasswordDTO {
 
     @Schema(minLength = 8,
             maxLength = 16,

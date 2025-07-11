@@ -3,6 +3,7 @@ package ru.skypro.homework.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.util.Lazy;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.impl.UserDetailsServiceImpl;
 
 import java.util.List;
@@ -30,7 +33,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class WebSecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
-
+    private final UserRepository userRepository;
     /**
      * Лист с URL для которых не нужна авторизация
      */
@@ -59,6 +62,11 @@ public class WebSecurityConfig {
         return authProvider;
     }
 
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new UserDetailsServiceImpl(userRepository);
+    }
+
     /**
      * Метод для настройки фильтра
      */
@@ -67,10 +75,13 @@ public class WebSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(AUTH_WHITELIST).permitAll()
-                        .anyRequest().authenticated()
-                )
+                .authorizeHttpRequests(
+                        authorization ->
+                                authorization
+                                        .mvcMatchers(AUTH_WHITELIST)
+                                        .permitAll()
+                                        .mvcMatchers("/ads/**", "/users/**")
+                                        .authenticated())
                 .httpBasic(withDefaults())
                 .userDetailsService(userDetailsService) // Указываем наш UserDetailsService
                 .authenticationProvider(authenticationProvider()); // Добавляем провайдер аутентификации
@@ -104,4 +115,5 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
 }

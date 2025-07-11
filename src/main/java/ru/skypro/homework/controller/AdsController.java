@@ -1,153 +1,275 @@
 package ru.skypro.homework.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-import ru.skypro.homework.dto.Advertisement.AdDTO;
-import ru.skypro.homework.dto.Advertisement.Ads;
-import ru.skypro.homework.dto.Advertisement.CreateOrUpdateAd;
-import ru.skypro.homework.dto.Advertisement.ExtendedAd;
+import ru.skypro.homework.dto.Advertisement.*;
+import ru.skypro.homework.entity.AdEntity;
+import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.Mapper.AdMapper;
 import ru.skypro.homework.service.impl.AdvertisementService;
 import ru.skypro.homework.service.impl.ImageService;
-import org.springframework.security.core.Authentication;
+
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Контроллер для работы с объявлениями
- *
- * @CrossOrigin(value = "http://localhost:3000") - разрешает доступ к API с любого домена
- */
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
-@RequestMapping("/ads")
 @RequiredArgsConstructor
-@Tag(name = "Объявления", description = "Операции с объявлениями")
+@RequestMapping("/ads")
 public class AdsController {
 
-    private final AdvertisementService advertisementService;
+    private final AdvertisementService adService;
     private final ImageService imageService;
-    private AdMapper adMapper;
+    private final UserRepository userRepository;
+    private final AdMapper adMapper;
 
-    /**
-     * Метод для получения всех объявлений
-     */
-    @Operation(summary = "Получение всех объявлений", tags = "Объявления")
+    @ApiResponse(responseCode = "200", description = "OK")
     @GetMapping
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Ads.class)))
-    @ApiResponse(responseCode = "500", description = "Internal Server Error")
-    public Ads getAllAds() {
-        return advertisementService.getAllAds();
+    public ResponseEntity<AdsDTO> getAllAds() {
+        List<AdEntity> ads = adService.getAllAds();
+        AdsDTO response = mapToAdsDTO(ads);
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * Метод для добавления нового объявления
-     *
-     * @SecurityRequirement(name = "basicAuth") - обязательно требуется авторизация
-     */
-    @Operation(summary = "Добавление нового объявления")
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @SecurityRequirement(name = "basicAuth")
-    @ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(implementation = AdDTO.class)))
-    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "201", description = "Created")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
-    @ApiResponse(responseCode = "403", description = "Forbidden")
-    @ResponseStatus(HttpStatus.CREATED)
-    public AdDTO addAd(@RequestPart("properties") CreateOrUpdateAd properties,
-                       @RequestPart("image") MultipartFile image, Authentication authentication) throws IOException {
-        return advertisementService.createAd(properties, image, authentication.getName());
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AdDTO> addAd(
+            @RequestPart CreateOrUpdateAdDTO properties,
+            @RequestPart MultipartFile image,
+            Authentication auth) throws IOException {
+
+        UserEntity user = getCurrentUser(auth);
+        AdEntity newAd = adMapper.toEntity(properties, user);
+        AdEntity createdAd = adService.createAd(newAd, image, user);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(adMapper.toAdDTO(createdAd));
     }
 
-    /**
-     * Метод для получения информации об объявлении по id
-     */
-    @Operation(summary = "Получение информации об объявлении")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "404", description = "Not Found")
     @GetMapping("/{id}")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ExtendedAd.class)))
-    public ExtendedAd getAd(@PathVariable Long id) {
-        return advertisementService.getExtendedAd(id);
+    public ResponseEntity<ExtendedAdDTO> getAd(@PathVariable Long id) {
+        AdEntity ad = adService.getAdById(id);
+        return ResponseEntity.ok(adMapper.toExtendedAdDTO(ad));
     }
 
-    /**
-     * Метод для удаления объявления
-     */
-    @Operation(summary = "Удаление объявления")
-    @DeleteMapping("/{id}")
     @ApiResponse(responseCode = "204", description = "No Content")
     @ApiResponse(responseCode = "401", description = "Unauthorized")
     @ApiResponse(responseCode = "403", description = "Forbidden")
     @ApiResponse(responseCode = "404", description = "Not Found")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @PreAuthorize("hasRole('ADMIN') or @advertisementService.isAuthor(#id, authentication.name)")
-    public void deleteAd(
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> removeAd(
             @PathVariable Long id,
-            Authentication authentication) throws IOException {
-        advertisementService.deleteAd(id, authentication.getName());
+            Authentication auth) throws IOException {
+
+        UserEntity user = getCurrentUser(auth);
+        adService.deleteAd(id, user);
+        return ResponseEntity.noContent().build();
     }
 
-    /**
-     * Метод для обновления объявления
-     */
-    @Operation(summary = "Обновление объявления")
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "Not Found")
     @PatchMapping("/{id}")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = AdDTO.class)))
-    @ApiResponse(responseCode = "400", description = "Bad Request")
-    @ApiResponse(responseCode = "401", description = "Unauthorized")
-    @ApiResponse(responseCode = "403", description = "Forbidden")
-    @ApiResponse(responseCode = "404", description = "Not Found")
-    public AdDTO updateAd(@PathVariable Long id,
-                          @RequestBody CreateOrUpdateAd updatedAd,
-                          Authentication authentication) {
-        return advertisementService.updateAd(id, updatedAd, authentication.getName());
-    }
-
-    /**
-     * Метод для получения объявлений текущего пользователя
-     */
-    @Operation(summary = "Получение объявлений текущего пользователя")
-    @GetMapping("/me")
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Ads.class)))
-    @ApiResponse(responseCode = "401", description = "Unauthorized")
-    public Ads getAdsMe(Authentication authentication) {
-        if (authentication == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-        return advertisementService.getAdsMe(authentication.getName());
-    }
-
-    /**
-     * Метод для обновления изображения объявления
-     */
-    @Operation(summary = "Обновление изображения объявления")
-    @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "application/octet-stream"))
-    @ApiResponse(responseCode = "400", description = "Bad Request")
-    @ApiResponse(responseCode = "401", description = "Unauthorized")
-    @ApiResponse(responseCode = "403", description = "Forbidden")
-    @ApiResponse(responseCode = "404", description = "Not Found")
-    @SecurityRequirement(name = "basicAuth")
-    public byte[] updateAdImage(
+    public ResponseEntity<AdDTO> updateAd(
             @PathVariable Long id,
-            @RequestParam("image") MultipartFile image,
-            Authentication authentication) throws IOException {
-        if (authentication == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-        String imagePath = advertisementService.updateAdImage(id, image, authentication.getName());
-        if (imagePath == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Image not found");
-        }
-        return imageService.loadImage(imagePath);
+            @RequestBody CreateOrUpdateAdDTO updatedAd,
+            Authentication auth) {
+
+        UserEntity user = getCurrentUser(auth);
+        AdEntity adUpdates = adMapper.toEntity(updatedAd,user);
+        AdEntity updatedEntity = adService.updateAd(id, adUpdates, user);
+
+        return ResponseEntity.ok(adMapper.toAdDTO(updatedEntity));
+    }
+
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @GetMapping("/me")
+    public ResponseEntity<AdsDTO> getAdsMe(Authentication auth) {
+        UserEntity user = getCurrentUser(auth);
+        List<AdEntity> userAds = adService.getUserAds(user);
+        AdsDTO response = mapToAdsDTO(userAds);
+        return ResponseEntity.ok(response);
+    }
+
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "400", description = "Bad Request")
+    @ApiResponse(responseCode = "401", description = "Unauthorized")
+    @ApiResponse(responseCode = "403", description = "Forbidden")
+    @ApiResponse(responseCode = "404", description = "Not Found")
+    @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateAdImage(
+            @PathVariable Long id,
+            @RequestParam MultipartFile image,
+            Authentication auth) throws IOException {
+
+        UserEntity user = getCurrentUser(auth);
+        adService.updateAdImage(id, image, user);
+        return ResponseEntity.ok().build();
+    }
+
+    @ApiResponse(responseCode = "200", description = "OK")
+    @ApiResponse(responseCode = "404", description = "Not Found")
+    @GetMapping(value = "/image/{filename}",
+            produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
+    public ResponseEntity<byte[]> getAdImage(@PathVariable String filename) throws IOException {
+        return ResponseEntity.ok(imageService.getImage(filename));
+    }
+
+    private UserEntity getCurrentUser(Authentication auth) {
+        String username = auth.getName();
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    private AdsDTO mapToAdsDTO(List<AdEntity> ads) {
+        return AdsDTO.builder()
+                .count(ads.size())
+                .results(ads.stream()
+                        .map(adMapper::toAdDTO)
+                        .collect(Collectors.toList()))
+                .build();
     }
 }
+
+//
+//
+//    private final AdvertisementService advertisementService;
+//    private final ImageService imageService;
+//
+//    /**
+//     * Получение всех объявлений
+//     */
+//    @Operation(summary = "Получение всех объявлений")
+//    @GetMapping
+//    @ApiResponse(responseCode = "200", description = "OK",
+//            content = @Content(schema = @Schema(implementation = AdsDTO.class)))
+//    @ApiResponse(responseCode = "500", description = "Internal Server Error")
+//    public AdsDTO getAllAds() {
+//        return advertisementService.getAllAds();
+//    }
+//
+//    /**
+//     *  Добавление нового объявления
+//     */
+//    @Operation(summary = "Добавление нового объявления")
+//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @SecurityRequirement(name = "basicAuth")
+//    @ApiResponse(responseCode = "201", description = "Created",
+//            content = @Content(schema = @Schema(implementation = AdDTO.class)))
+//    @ApiResponse(responseCode = "400", description = "Bad Request")
+//    @ApiResponse(responseCode = "401", description = "Unauthorized")
+//    @ApiResponse(responseCode = "403", description = "Forbidden")
+//    @ResponseStatus(HttpStatus.CREATED)
+//    public AdDTO addAd(@RequestPart("properties") CreateOrUpdateAdDTO properties,
+//                       @RequestPart("image") MultipartFile image,
+//                       Authentication authentication) throws IOException {
+//        return advertisementService.createAd(properties, image, authentication.getName());
+//    }
+//
+//    /**
+//     * Получение информации об объявлении по id
+//     */
+//    @Operation(summary = "Получение информации об объявлении")
+//    @GetMapping("/{id}")
+//    @ApiResponse(responseCode = "200", description = "OK",
+//            content = @Content(schema = @Schema(implementation = ExtendedAdDTO.class)))
+//    @ApiResponse(responseCode = "404", description = "Not Found")
+//    public ExtendedAdDTO getAd(@PathVariable Long id) {
+//        return advertisementService.getExtendedAd(id);
+//    }
+//
+//    /**
+//     * Обновление объявления
+//     */
+//    @Operation(summary = "Обновление объявления")
+//    @PatchMapping("/{id}")
+//    @ApiResponse(responseCode = "200", description = "OK",
+//            content = @Content(schema = @Schema(implementation = AdDTO.class)))
+//    @ApiResponse(responseCode = "400", description = "Bad Request")
+//    @ApiResponse(responseCode = "401", description = "Unauthorized")
+//    @ApiResponse(responseCode = "403", description = "Forbidden")
+//    @ApiResponse(responseCode = "404", description = "Not Found")
+//    public AdDTO updateAd(@PathVariable Long id,
+//                          @RequestBody CreateOrUpdateAdDTO updatedAd,
+//                          Authentication authentication) {
+//        return advertisementService.updateAd(id, updatedAd, authentication.getName());
+//    }
+//
+//    /**
+//     * Удаление объявления
+//     */
+//    @Operation(summary = "Удаление объявления")
+//    @DeleteMapping("/{id}")
+//    @ApiResponse(responseCode = "204", description = "No Content")
+//    @ApiResponse(responseCode = "401", description = "Unauthorized")
+//    @ApiResponse(responseCode = "403", description = "Forbidden")
+//    @ApiResponse(responseCode = "404", description = "Not Found")
+//    @ResponseStatus(HttpStatus.NO_CONTENT)
+//    @PreAuthorize("hasRole('ADMIN') or @advertisementService.isAuthor(#id, authentication.name)")
+//    public void deleteAd(@PathVariable Long id,
+//                         Authentication authentication) throws IOException {
+//        advertisementService.deleteAd(id, authentication.getName());
+//    }
+//
+//    /**
+//     * Представление списка объявлений текущего пользователя
+//     */
+//    @Operation(summary = "Получение объявлений текущего пользователя")
+//    @GetMapping("/me")
+//    @ApiResponse(responseCode = "200", description = "OK",
+//            content = @Content(schema = @Schema(implementation = AdsDTO.class)))
+//    @ApiResponse(responseCode = "401", description = "Unauthorized")
+//    public AdsDTO getAdsMe(Authentication authentication) {
+//        if (authentication == null) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+//        }
+//        return advertisementService.getAdsMe(authentication.getName());
+//    }
+//
+//    /**
+//     * Обновление изображения объявления
+//     */
+//    @Operation(summary = "Обновление изображения объявления")
+//    @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @SecurityRequirement(name = "basicAuth")
+//    @ApiResponse(responseCode = "200", description = "OK",
+//            content = @Content(schema = @Schema(implementation = String.class)))
+//    @ApiResponse(responseCode = "400", description = "Bad Request")
+//    @ApiResponse(responseCode = "401", description = "Unauthorized")
+//    @ApiResponse(responseCode = "403", description = "Forbidden")
+//    @ApiResponse(responseCode = "404", description = "Not Found")
+//    public ResponseEntity<String> updateAdImage(@PathVariable Long id,
+//                                                @RequestParam("image") MultipartFile image,
+//                                                Authentication authentication) throws IOException {
+//        if (authentication == null) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+//        }
+//        String imagePath = advertisementService.updateAdImage(id, image, authentication.getName());
+//        return ResponseEntity.ok(imagePath);
+//    }
+//
+//    @Operation(summary = "Получение изображения объявления")
+//    @GetMapping(value = "/image/{id}", produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_PNG_VALUE})
+//    @ApiResponse(responseCode = "200", description = "OK",
+//            content = @Content(mediaType = "image/jpeg, image/png"))
+//    @ApiResponse(responseCode = "404", description = "Not Found")
+//    public ResponseEntity<byte[]> getAdImage(@PathVariable Integer id) throws IOException {
+//        byte[] image = imageService.getImage("/ads/image/" + id);
+//        return ResponseEntity.ok(image);
+//    }

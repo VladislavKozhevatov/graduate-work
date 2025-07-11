@@ -3,15 +3,13 @@ package ru.skypro.homework.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.skypro.homework.entity.AdEntity;
-import ru.skypro.homework.entity.CommentEntity;
 import ru.skypro.homework.entity.UserEntity;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
-public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
+public interface AdRepository extends JpaRepository<AdEntity, Long> {
+    List<AdEntity> findAllByAuthor(UserEntity author);
+    List<AdEntity> findAllByOrderByCreatedAtDesc();
 
-    List<CommentEntity> findAllByAd_Pk(Long adPk);
 }

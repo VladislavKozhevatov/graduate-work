@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Данные для обновления информации о пользователе")
-public class UpdatedUser {
+public class UpdateUserDTO {
     @Schema(description = "Имя пользователя")
     private String firstName;
 

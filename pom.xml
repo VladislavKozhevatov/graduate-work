@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.5</version>
+        <version>2.7.15</version>
         <relativePath/>
     </parent>
 
@@ -34,13 +34,13 @@
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.3.0</version>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.8.0</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
+            <version>42.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
+            <version>1.18.30</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -72,7 +72,6 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.32.0</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -6,7 +6,7 @@ import ru.skypro.homework.dto.Role;
 
 
 @Data
-public class Register {
+public class RegisterDTO {
 
     @Schema(description = "Email пользователя",
             example = "user@example.com")

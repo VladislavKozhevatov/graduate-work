@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "Полная информация об объявлении")
-public class ExtendedAd {
+public class ExtendedAdDTO {
 
     @Schema(description = "ID объявления")
     private Long pk;

@@ -6,78 +6,81 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.Comments.CommentDTO;
-import ru.skypro.homework.dto.Advertisement.CreateOrUpdateAd;
-import ru.skypro.homework.dto.Comments.CreateOrUpdateComment;
+import ru.skypro.homework.dto.Comments.CommentsDTO;
+import ru.skypro.homework.dto.Comments.CreateOrUpdateCommentDTO;
+import ru.skypro.homework.entity.UserEntity;
+import ru.skypro.homework.repository.UserRepository;
+import ru.skypro.homework.service.impl.CommentService;
 
 import java.util.Collections;
 import java.util.List;
 
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
-@Tag(name = "Комментарии")
-@RequestMapping("/ads/{adId}/comments")
+@RequiredArgsConstructor
+@RequestMapping("/ads/{adPk}/comments")
 public class CommentsController {
 
-    /**
-     * Получение всех комментариев
-     */
-    @Operation(summary = "получение все комментариев")
+    private final CommentService commentService;
+    private final UserRepository userRepository;
+
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "401")
+    @ApiResponse(responseCode = "404")
     @GetMapping
-    @ApiResponse(responseCode = "200", description = "OK",
-            content = @Content(schema = @Schema(implementation = CommentDTO[].class)))
-    @ApiResponse(responseCode = "401", description = "Unauthorized")
-    @ApiResponse(responseCode = "404", description = "Not Found")
-    public List<CommentDTO> getComments(@PathVariable Long adId) {
-        return Collections.emptyList();
+    public ResponseEntity<CommentsDTO> getComments(@PathVariable Long adPk) {
+        return ResponseEntity.ok(commentService.getComments(adPk));
     }
 
-    /**
-     * Получение комментария по id
-     */
-    @Operation(summary = "Добавление комментария")
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "401")
+    @ApiResponse(responseCode = "404")
     @PostMapping
-    @SecurityRequirement(name = "basicAuth")
-    @ApiResponse(responseCode = "200", description = "OK",
-            content = @Content(schema = @Schema(implementation = CommentDTO.class)))
-    @ApiResponse(responseCode = "401", description = "Unauthorized")
-    @ApiResponse(responseCode = "404", description = "Not Found")
-    public CommentDTO addComment(@PathVariable Long adId,
-                                 @RequestBody CreateOrUpdateComment comment) {
-        return new CommentDTO();
+    public ResponseEntity<CommentDTO> addComment(
+            @PathVariable Long adPk,
+            @RequestBody CreateOrUpdateCommentDTO commentDTO,
+            Authentication auth) {
+        String username = auth.getName();
+        UserEntity user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return ResponseEntity.ok(commentService.addComment(adPk, commentDTO, user));
     }
 
-    /**
-     * Удаление комментария по id
-     */
-    @Operation(summary = "Удаление комментария")
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "401")
+    @ApiResponse(responseCode = "403")
+    @ApiResponse(responseCode = "404")
     @DeleteMapping("/{commentId}")
-    @SecurityRequirement(name = "basicAuth")
-    @ApiResponse(responseCode = "200", description = "OK")
-    @ApiResponse(responseCode = "401", description = "Unauthorized")
-    @ApiResponse(responseCode = "403", description = "Forbidden")
-    @ApiResponse(responseCode = "404", description = "Not Found")
-    public ResponseEntity<?> deleteComment(@PathVariable Long adId,
-                                           @PathVariable Long commentId) {
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long adPk,
+            @PathVariable Long commentId,
+            Authentication auth) {
+        String username = auth.getName();
+        UserEntity user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        commentService.deleteComment(adPk, commentId, user);
         return ResponseEntity.ok().build();
     }
 
-    /**
-     * Обновление комментария по id
-     */
-    @Operation(summary = "Обновление комментария")
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "401")
+    @ApiResponse(responseCode = "403")
+    @ApiResponse(responseCode = "404")
     @PatchMapping("/{commentId}")
-    @SecurityRequirement(name = "basicAuth")
-    @ApiResponse(responseCode = "200", description = "OK",
-            content = @Content(schema = @Schema(implementation = CommentDTO.class)))
-    @ApiResponse(responseCode = "401", description = "Unauthorized")
-    @ApiResponse(responseCode = "403", description = "Forbidden")
-    @ApiResponse(responseCode = "404", description = "Not Found")
-    public CommentDTO updateComment(@PathVariable Long adId,
-                                    @PathVariable Long commentId,
-                                    @RequestBody CreateOrUpdateComment comment) {
-        return new CommentDTO();
+    public ResponseEntity<CommentDTO> updateComment(
+            @PathVariable Long adPk,
+            @PathVariable Long commentId,
+            @RequestBody CreateOrUpdateCommentDTO commentDTO,
+            Authentication auth) {
+        String username = auth.getName();
+        UserEntity user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return ResponseEntity.ok(commentService.updateComment(adPk, commentId, commentDTO, user));
     }
 }

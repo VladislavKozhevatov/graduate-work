@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Schema(description = "Данные для создания или обновления объявления")
-public class CreateOrUpdateAd {
+public class CreateOrUpdateAdDTO {
 
     @Schema(description = "Заголовок объявления",
             minLength = 5,

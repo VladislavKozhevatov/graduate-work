@@ -1,4 +1,5 @@
--- changeset vkozhevatov:2
+-- changeset yourname:1
+
 CREATE TABLE users (
     id BIGSERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -7,7 +8,7 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     phone VARCHAR(20) NOT NULL,
     role VARCHAR(10) NOT NULL,
-    image VARCHAR(255)
+    image_id BIGINT UNIQUE REFERENCES user_images(id)
 );
 
 CREATE TABLE advertisement (
@@ -16,7 +17,6 @@ CREATE TABLE advertisement (
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
     price INTEGER NOT NULL,
-    image VARCHAR(255) NOT NULL,
     CONSTRAINT fk_ad_user FOREIGN KEY (author_id) REFERENCES users(id)
 );
 
